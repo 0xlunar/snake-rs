@@ -1,0 +1,9 @@
+[package]
+name = "snake_game"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clearscreen = "2.0.1"
+crossterm = { version = "0.26.1", features = ["event-stream"] }
+rand = "0.8.5"
