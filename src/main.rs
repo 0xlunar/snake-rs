@@ -1,10 +1,9 @@
 use rand::Rng;
 use clearscreen;
-
+use std::{thread, time::Duration};
 use crossterm::{
     event::{read, KeyEvent, Event, KeyCode},
 };
-use std::{io, thread, time::Duration};
 
 fn main(){
     let mut board = Board::new(16, 16);
@@ -12,6 +11,7 @@ fn main(){
 }
 
 type Node<T> = Option<Box<T>>;
+
 #[derive(Debug, Clone, Copy)]
 enum Directions {
     UP,
@@ -19,6 +19,7 @@ enum Directions {
     LEFT,
     RIGHT
 }
+
 #[derive(Debug)]
 struct Board {
     height: i32,
@@ -29,6 +30,7 @@ struct Board {
     direction: Directions,
     snake: Snake,
 }
+
 #[derive(Debug, Clone)]
 struct Snake {
     head: (i32, i32),
