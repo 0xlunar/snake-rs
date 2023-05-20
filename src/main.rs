@@ -48,7 +48,7 @@ impl Snake {
     }
 
     pub fn move_direction(&mut self, direction: Directions) {
-        self.move_body(&direction);
+        self.move_body();
         match direction {
             Directions::UP => self.head.1 -= 1,
             Directions::DOWN => self.head.1 += 1,
@@ -57,12 +57,12 @@ impl Snake {
         }
     }
 
-    fn move_body(&mut self, direction: &Directions) {
+    fn move_body(&mut self) {
         match &mut self.tail {
             Some(snake) => {
+                snake.move_body();
                 snake.head.0 = self.head.0;
                 snake.head.1 = self.head.1;
-                snake.move_body(direction)
                 // snake.move_direction(direction.to_owned());
             },
             None => (),
@@ -70,7 +70,7 @@ impl Snake {
     }
 
     fn render(&self, grid: &mut[&mut[char]]) {
-        grid[self.head.0 as usize][self.head.1 as usize] = '#';
+        grid[self.head.0 as usize][self.head.1 as usize] = '&';
         match &self.tail {
             Some(snake) => snake.render(grid),
             None => (),
@@ -98,6 +98,7 @@ impl Board {
         } else if head.0 == self.fruit_pos.0.try_into().unwrap() && head.1 == self.fruit_pos.1.try_into().unwrap() {
             self.snake.eat_fruit();
             self.spawn_fruit();
+            self.score += 1;
         }
     }
 
@@ -116,7 +117,7 @@ impl Board {
         let mut grid: Vec<_> = grid.as_mut_slice().chunks_mut((self.width).try_into().unwrap()).collect();
         let grid = grid.as_mut_slice();
 
-        grid[self.fruit_pos.0 as usize][self.fruit_pos.1 as usize] = '@';
+        grid[self.fruit_pos.0 as usize][self.fruit_pos.1 as usize] = '■';
         self.snake.render(grid);
         
 
@@ -127,8 +128,9 @@ impl Board {
             }
             builder.push('\n');
         }
-        println!("X: {}, Y: {}", self.snake.head.0, self.snake.head.1);
+        println!("X: {}, Y: {}, Score: {}", self.snake.head.0, self.snake.head.1, self.score);
         println!("{}", builder);
+        println!("ESC = Quit | LEFT, RIGHT, UP, DOWN");
         thread::sleep(Duration::from_millis(100));
     }
 
@@ -150,8 +152,6 @@ impl Board {
             },
             _ => ()
         }
-        
-        println!("{:?}",  self.direction);
     }
 
     pub fn start(&mut self) {
