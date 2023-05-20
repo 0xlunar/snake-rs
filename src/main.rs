@@ -128,7 +128,7 @@ impl Board {
         let mut builder = String::new();
         for i in 0..grid.len() {
             for j in 0..grid[i].len() {
-                builder.push(grid[j][i]);
+                builder.push(grid[i][j]);
             }
             builder.push('\n');
         }
