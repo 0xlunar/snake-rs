@@ -65,7 +65,6 @@ impl Snake {
                 snake.move_body();
                 snake.head.0 = self.head.0;
                 snake.head.1 = self.head.1;
-                // snake.move_direction(direction.to_owned());
             },
             None => (),
         }
@@ -83,8 +82,8 @@ impl Snake {
 impl Board {
     pub fn new(width: i32, height: i32) -> Board {
         let mut rng = rand::thread_rng();
-        let rand_x: i32 = (rng.gen::<f64>() * width as f64) as i32;
-        let rand_y: i32 = (rng.gen::<f64>() * height as f64) as i32;
+        let rand_x: i32 = (rng.gen::<f32>() * width as f32) as i32;
+        let rand_y: i32 = (rng.gen::<f32>() * height as f32) as i32;
 
         Board { height, width, score: 0, fruit_pos: (rand_x, rand_y), alive: true, direction: Directions::RIGHT, snake: Snake::new(height / 2, width / 2) }
     }
@@ -95,9 +94,9 @@ impl Board {
         }
         self.snake.move_direction(direction);
         let head = &self.snake.head;
-        if head.0 < 0 || head.0 > (self.width - 1).try_into().unwrap() || head.1 < 0 || head.1 > (self.height - 1).try_into().unwrap() {
+        if head.0 < 0 || head.0 > self.width - 1 || head.1 < 0 || head.1 > self.height - 1 {
             self.alive = false;
-        } else if head.0 == self.fruit_pos.0.try_into().unwrap() && head.1 == self.fruit_pos.1.try_into().unwrap() {
+        } else if head.0 == self.fruit_pos.0 && head.1 == self.fruit_pos.1 {
             self.snake.eat_fruit();
             self.spawn_fruit();
             self.score += 1;
