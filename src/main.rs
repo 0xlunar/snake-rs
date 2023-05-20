@@ -6,7 +6,7 @@ use crossterm::{
 };
 
 fn main(){
-    let mut board = Board::new(16, 16);
+    let mut board = Board::new(32, 32);
     board.start();
 }
 
@@ -92,9 +92,10 @@ impl Board {
         if !self.alive {
             return;
         }
+        
         self.snake.move_direction(direction);
         let head = &self.snake.head;
-        if head.0 < 0 || head.0 > self.width - 1 || head.1 < 0 || head.1 > self.height - 1 {
+        if head.0 < 0 || head.0 >= self.width || head.1 < 0 || head.1 >= self.height {
             self.alive = false;
         } else if head.0 == self.fruit_pos.0 && head.1 == self.fruit_pos.1 {
             self.snake.eat_fruit();
@@ -105,8 +106,8 @@ impl Board {
 
     fn spawn_fruit(&mut self) {
         let mut rng = rand::thread_rng();
-        let rand_x: i32 = (rng.gen::<f64>() * self.width as f64) as i32;
-        let rand_y: i32 = (rng.gen::<f64>() * self.height as f64) as i32;
+        let rand_x: i32 = (rng.gen::<f32>() * self.width as f32) as i32;
+        let rand_y: i32 = (rng.gen::<f32>() * self.height as f32) as i32;
 
         self.fruit_pos = (rand_x, rand_y);
     }
@@ -118,10 +119,12 @@ impl Board {
         let mut grid: Vec<_> = grid.as_mut_slice().chunks_mut((self.width).try_into().unwrap()).collect();
         let grid = grid.as_mut_slice();
 
-        grid[self.fruit_pos.0 as usize][self.fruit_pos.1 as usize] = '■';
-        self.snake.render(grid);
-        
+        if self.alive {
+            self.snake.render(grid);
+        }
 
+        grid[self.fruit_pos.0 as usize][self.fruit_pos.1 as usize] = '■';
+        
         let mut builder = String::new();
         for i in 0..grid.len() {
             for j in 0..grid[i].len() {
