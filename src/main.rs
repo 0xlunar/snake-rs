@@ -71,9 +71,17 @@ impl Snake {
     }
 
     fn render(&self, grid: &mut[&mut[char]]) {
-        grid[self.head.0 as usize][self.head.1 as usize] = '&';
+        grid[self.head.0 as usize][self.head.1 as usize] = '$';
         match &self.tail {
-            Some(snake) => snake.render(grid),
+            Some(snake) => snake.render_body(grid),
+            None => (),
+        }
+    }
+
+    fn render_body(&self, grid: &mut[&mut[char]]) {
+        grid[self.head.0 as usize][self.head.1 as usize] = '#';
+        match &self.tail {
+            Some(snake) => snake.render_body(grid),
             None => (),
         }
     }
@@ -114,7 +122,6 @@ impl Board {
 
     fn render(&self) {
         clearscreen::clear().expect("failed to clear");
-        
         let mut grid = vec!['*'; (self.width * self.height).try_into().unwrap()];
         let mut grid: Vec<_> = grid.as_mut_slice().chunks_mut((self.width).try_into().unwrap()).collect();
         let grid = grid.as_mut_slice();
@@ -123,7 +130,7 @@ impl Board {
             self.snake.render(grid);
         }
 
-        grid[self.fruit_pos.0 as usize][self.fruit_pos.1 as usize] = '■';
+        grid[self.fruit_pos.0 as usize][self.fruit_pos.1 as usize] = '@';
         
         let mut builder = String::new();
         for i in 0..grid.len() {
@@ -135,7 +142,6 @@ impl Board {
         println!("X: {}, Y: {}, Score: {}", self.snake.head.0, self.snake.head.1, self.score);
         println!("{}", builder);
         println!("ESC = Quit | LEFT, RIGHT, UP, DOWN");
-        thread::sleep(Duration::from_millis(100));
     }
 
     pub fn detect_input(&mut self) {
@@ -163,6 +169,7 @@ impl Board {
             self.detect_input();
             self.move_snake(self.direction);
             self.render();
+            thread::sleep(Duration::from_millis(25));
         }
     }
 
