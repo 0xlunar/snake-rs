@@ -1,17 +1,17 @@
 use rand::Rng;
 use clearscreen;
-use std::{thread, time::Duration};
+use std::{thread, time::Duration, process::exit};
 use crossterm::{
     event::{read, KeyEvent, Event, KeyCode},
 };
 
 fn main(){
     loop {
-        let mut board = Board::new(24, 24);
+        let mut board = Board::new(25, 100);
         board.start();
     
-        println!("Game over! restarting in 15 seconds.");
-        thread::sleep(Duration::from_millis(15000));
+        println!("Game over! restarting in 1 seconds.");
+        thread::sleep(Duration::from_millis(1000));
 
     }
 }
@@ -117,13 +117,17 @@ impl Board {
 
     pub fn move_snake(&mut self, direction: Directions) {
         if !self.alive {
-            return;
+            println!("We dead");
+            std::process::exit(0);
+
+            // return;
         }
     
         self.snake.move_direction(direction);
 
         if self.snake.did_self_collide(self.snake.head.0, self.snake.head.1) {
-            std::process::exit(0);
+           self.alive = false;
+           return;
         }
 
         let head = &self.snake.head;
@@ -138,8 +142,8 @@ impl Board {
 
     fn spawn_fruit(&mut self) {
         let mut rng = rand::thread_rng();
-        let rand_x: i32 = (rng.gen::<f32>() * self.width as f32) as i32;
-        let rand_y: i32 = (rng.gen::<f32>() * self.height as f32) as i32;
+        let rand_x: i32 = (rng.gen::<f32>() * (self.width - 1) as f32) as i32;
+        let rand_y: i32 = (rng.gen::<f32>() * (self.height - 1) as f32) as i32;
 
         self.fruit_pos = (rand_x, rand_y);
     }
@@ -147,7 +151,7 @@ impl Board {
     fn render(&self) {
         clearscreen::clear().expect("failed to clear");
         let mut grid = vec!['*'; (self.width * self.height).try_into().unwrap()];
-        let mut grid: Vec<_> = grid.as_mut_slice().chunks_mut((self.width).try_into().unwrap()).collect();
+        let mut grid: Vec<_> = grid.as_mut_slice().chunks_mut((self.height).try_into().unwrap()).collect();
         let grid = grid.as_mut_slice();
 
         if self.alive {
@@ -157,9 +161,9 @@ impl Board {
         grid[self.fruit_pos.0 as usize][self.fruit_pos.1 as usize] = '@';
         
         let mut builder = String::new();
-        for i in 0..grid.len() {
-            for j in 0..grid[i].len() {
-                builder.push(grid[i][j]);
+        for x in 0..grid.len() {
+            for y in 0..grid[x].len() {
+                builder.push(grid[x][y]);
             }
             builder.push('\n');
         }
@@ -202,12 +206,13 @@ impl Board {
 
     pub fn start(&mut self) {
 
-        let fps = 1000 / 60;
+        let fps = 1000 / 15;
 
         while self.alive {
             self.detect_input();
             self.move_snake(self.direction);
             self.render();
+            println!("Alive");
             thread::sleep(Duration::from_millis(fps));
         }
     }
