@@ -176,7 +176,7 @@ impl Board {
                         KeyCode::Down => self.direction = Directions::DOWN,
                         KeyCode::Left =>  self.direction = Directions::LEFT,
                         KeyCode::Right =>  self.direction = Directions::RIGHT,
-                        KeyCode::Esc => self.alive = false,
+                        KeyCode::Esc => std::process::exit(0),
                         _ => ()
                     }
                 },
