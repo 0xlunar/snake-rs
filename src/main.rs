@@ -6,8 +6,14 @@ use crossterm::{
 };
 
 fn main(){
-    let mut board = Board::new(24, 24);
-    board.start();
+    loop {
+        let mut board = Board::new(24, 24);
+        board.start();
+    
+        println!("Game over! restarting in 15 seconds.");
+        thread::sleep(Duration::from_millis(15000));
+
+    }
 }
 
 type Node<T> = Option<Box<T>>;
@@ -70,6 +76,18 @@ impl Snake {
         }
     }
 
+    fn did_self_collide(&self) -> bool {
+        match &self.tail {
+            Some(snake) => {
+                if snake.head.0 == self.head.0 && snake.head.1 == self.head.0 {
+                    return true;
+                }
+                return false;
+            },
+            None => return false,
+        }
+    }
+
     fn render(&self, grid: &mut[&mut[char]]) {
         grid[self.head.0 as usize][self.head.1 as usize] = '$';
         match &self.tail {
@@ -102,6 +120,10 @@ impl Board {
         }
         
         self.snake.move_direction(direction);
+        if self.snake.did_self_collide() {
+            self.alive = false;
+            return;
+        }
         let head = &self.snake.head;
         if head.0 < 0 || head.0 >= self.width || head.1 < 0 || head.1 >= self.height {
             self.alive = false;
@@ -166,10 +188,10 @@ impl Board {
 
     pub fn start(&mut self) {
         while self.alive {
-            self.detect_input();
             self.move_snake(self.direction);
             self.render();
-            thread::sleep(Duration::from_millis(25));
+            self.detect_input();
+            thread::sleep(Duration::from_millis(100));
         }
     }
 
