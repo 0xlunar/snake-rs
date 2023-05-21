@@ -70,19 +70,20 @@ impl Snake {
             Some(snake) => {
                 snake.move_body();
                 snake.head.0 = self.head.0;
-                snake.head.1 = self.head.1;
+                snake.head.1 = self.head.1; 
             },
             None => (),
         }
     }
 
-    fn did_self_collide(&self) -> bool {
+    fn did_self_collide(&self, head_x: i32, head_y: i32) -> bool {
         match &self.tail {
             Some(snake) => {
-                if snake.head.0 == self.head.0 && snake.head.1 == self.head.0 {
+                 if snake.head.0 == head_x && snake.head.1 == head_y {
                     return true;
-                }
-                return false;
+                 } else {
+                    return snake.did_self_collide(head_x, head_y);
+                 }
             },
             None => return false,
         }
@@ -118,12 +119,13 @@ impl Board {
         if !self.alive {
             return;
         }
-        
+    
         self.snake.move_direction(direction);
-        if self.snake.did_self_collide() {
-            self.alive = false;
-            return;
+
+        if self.snake.did_self_collide(self.snake.head.0, self.snake.head.1) {
+            std::process::exit(0);
         }
+
         let head = &self.snake.head;
         if head.0 < 0 || head.0 >= self.width || head.1 < 0 || head.1 >= self.height {
             self.alive = false;
@@ -172,10 +174,22 @@ impl Board {
             Ok(e) => match e {
                 Event::Key(KeyEvent { code, ..}) => {
                     match code {
-                        KeyCode::Up => self.direction = Directions::UP,
-                        KeyCode::Down => self.direction = Directions::DOWN,
-                        KeyCode::Left =>  self.direction = Directions::LEFT,
-                        KeyCode::Right =>  self.direction = Directions::RIGHT,
+                        KeyCode::Up => {
+                            println!("UP");
+                            self.direction = Directions::UP
+                        },
+                        KeyCode::Down => {
+                            println!("DOWN");
+                            self.direction = Directions::DOWN
+                        },
+                        KeyCode::Left =>  {
+                            println!("LEFT");
+                            self.direction = Directions::LEFT
+                        },
+                        KeyCode::Right =>  {
+                            println!("RIGHT");
+                            self.direction = Directions::RIGHT
+                        },
                         KeyCode::Esc => std::process::exit(0),
                         _ => ()
                     }
@@ -187,11 +201,14 @@ impl Board {
     }
 
     pub fn start(&mut self) {
+
+        let fps = 1000 / 60;
+
         while self.alive {
+            self.detect_input();
             self.move_snake(self.direction);
             self.render();
-            self.detect_input();
-            thread::sleep(Duration::from_millis(100));
+            thread::sleep(Duration::from_millis(fps));
         }
     }
 
