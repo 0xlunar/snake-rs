@@ -6,7 +6,7 @@ use crossterm::{
 };
 
 fn main(){
-    let mut board = Board::new(32, 32);
+    let mut board = Board::new(24, 24);
     board.start();
 }
 
@@ -52,10 +52,10 @@ impl Snake {
     pub fn move_direction(&mut self, direction: Directions) {
         self.move_body();
         match direction {
-            Directions::UP => self.head.1 -= 1,
-            Directions::DOWN => self.head.1 += 1,
-            Directions::LEFT => self.head.0 -= 1,
-            Directions::RIGHT => self.head.0 += 1
+            Directions::UP => self.head.0 -= 1,
+            Directions::DOWN => self.head.0 += 1,
+            Directions::LEFT => self.head.1 -= 1,
+            Directions::RIGHT => self.head.1 += 1
         }
     }
 
