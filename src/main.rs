@@ -7,7 +7,7 @@ use crossterm::{
 
 fn main(){
     loop {
-        let mut board = Board::new(25, 25);
+        let mut board = Board::new(25);
         board.start();
     
         println!("Game over! restarting in 1 seconds.");
@@ -28,8 +28,7 @@ enum Directions {
 
 #[derive(Debug)]
 struct Board {
-    height: i32,
-    width: i32,
+    size: i32,
     fruit_pos: (i32, i32),
     score: i32,
     alive: bool,
@@ -89,7 +88,7 @@ impl Snake {
         }
     }
 
-    fn render(&self, grid: &mut[&mut[char]]) {
+    fn render(&self, grid: &mut Vec<Vec<char>>) {
         grid[self.head.0 as usize][self.head.1 as usize] = '$';
         match &self.tail {
             Some(snake) => snake.render_body(grid),
@@ -97,7 +96,7 @@ impl Snake {
         }
     }
 
-    fn render_body(&self, grid: &mut[&mut[char]]) {
+    fn render_body(&self, grid: &mut Vec<Vec<char>>) {
         grid[self.head.0 as usize][self.head.1 as usize] = '#';
         match &self.tail {
             Some(snake) => snake.render_body(grid),
@@ -107,20 +106,17 @@ impl Snake {
 }
 
 impl Board {
-    pub fn new(width: i32, height: i32) -> Board {
+    pub fn new(size: i32) -> Board {
         let mut rng = rand::thread_rng();
-        let rand_x: i32 = (rng.gen::<f32>() * width as f32) as i32;
-        let rand_y: i32 = (rng.gen::<f32>() * height as f32) as i32;
+        let rand_x: i32 = (rng.gen::<f32>() * size as f32) as i32;
+        let rand_y: i32 = (rng.gen::<f32>() * size as f32) as i32;
 
-        Board { height, width, score: 0, fruit_pos: (rand_x, rand_y), alive: true, direction: Directions::RIGHT, snake: Snake::new(height / 2, width / 2) }
+        Board { size, score: 0, fruit_pos: (rand_x, rand_y), alive: true, direction: Directions::RIGHT, snake: Snake::new(size / 2, size / 2) }
     }
 
     pub fn move_snake(&mut self, direction: Directions) {
         if !self.alive {
-            println!("We dead");
-            std::process::exit(0);
-
-            // return;
+            return;
         }
     
         self.snake.move_direction(direction);
@@ -131,7 +127,7 @@ impl Board {
         }
 
         let head = &self.snake.head;
-        if head.0 < 0 || head.0 >= self.width || head.1 < 0 || head.1 >= self.height {
+        if head.0 < 0 || head.0 >= self.size || head.1 < 0 || head.1 >= self.size {
             self.alive = false;
         } else if head.0 == self.fruit_pos.0 && head.1 == self.fruit_pos.1 {
             self.snake.eat_fruit();
@@ -142,20 +138,19 @@ impl Board {
 
     fn spawn_fruit(&mut self) {
         let mut rng = rand::thread_rng();
-        let rand_x: i32 = (rng.gen::<f32>() * (self.width - 1) as f32) as i32;
-        let rand_y: i32 = (rng.gen::<f32>() * (self.height - 1) as f32) as i32;
+        let rand_x: i32 = (rng.gen::<f32>() * (self.size - 1) as f32) as i32;
+        let rand_y: i32 = (rng.gen::<f32>() * (self.size - 1) as f32) as i32;
 
         self.fruit_pos = (rand_x, rand_y);
     }
 
     fn render(&self) {
         clearscreen::clear().expect("failed to clear");
-        let mut grid = vec!['*'; (self.width * self.height).try_into().unwrap()];
-        let mut grid: Vec<_> = grid.as_mut_slice().chunks_mut((self.height).try_into().unwrap()).collect();
-        let grid = grid.as_mut_slice();
+
+        let mut grid = vec![vec!['*'; self.size as usize]; self.size as usize];
 
         if self.alive {
-            self.snake.render(grid);
+            self.snake.render(&mut grid);
         }
 
         grid[self.fruit_pos.0 as usize][self.fruit_pos.1 as usize] = '@';
@@ -206,7 +201,7 @@ impl Board {
 
     pub fn start(&mut self) {
 
-        let fps = 1000 / 15;
+        let fps = 1000 / 1;
 
         while self.alive {
             self.detect_input();
