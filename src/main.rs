@@ -1,13 +1,13 @@
 use rand::Rng;
 use clearscreen;
-use std::{thread, time::Duration, process::exit};
+use std::{thread, time::Duration};
 use crossterm::{
     event::{read, KeyEvent, Event, KeyCode},
 };
 
 fn main(){
     loop {
-        let mut board = Board::new(25, 100);
+        let mut board = Board::new(25, 25);
         board.start();
     
         println!("Game over! restarting in 1 seconds.");
@@ -212,9 +212,9 @@ impl Board {
             self.detect_input();
             self.move_snake(self.direction);
             self.render();
-            println!("Alive");
             thread::sleep(Duration::from_millis(fps));
         }
+
     }
 
 }
